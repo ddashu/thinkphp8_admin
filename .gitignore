@@ -1,0 +1,29 @@
+*.log
+.env
+composer.phar
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+.settings
+.buildpath
+.project
+
+# PHP
+vendor/
+runtime/
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build output
+public/dist/
+
+# Workflow
+.super-dev/
+
+# OS
+*.swp
+*.swo
+*~
