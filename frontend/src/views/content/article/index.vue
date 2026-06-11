@@ -110,7 +110,7 @@
     </div>
 
     <!-- Add/Edit Dialog -->
-    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="800px" :close-on-click-modal="false" top="5vh">
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="900px" :close-on-click-modal="false" top="5vh">
       <el-form ref="form" :model="form" :rules="formRules" label-width="100px" size="small">
         <el-row :gutter="20">
           <el-col :span="14">
@@ -163,12 +163,12 @@
           </el-upload>
         </el-form-item>
         <el-form-item label="内容" prop="content">
-          <el-input
+          <quill-editor
+            ref="quillEditor"
             v-model="form.content"
-            type="textarea"
-            :rows="12"
-            placeholder="支持 Markdown 格式编写文章内容..."
-            class="article-editor"
+            :options="editorOption"
+            class="rich-editor"
+            @change="onEditorChange"
           />
         </el-form-item>
         <el-row :gutter="20">
@@ -213,7 +213,7 @@
           <el-image :src="detailData.cover_image" fit="contain" style="max-width: 100%; max-height: 300px; border-radius: 8px" />
         </div>
         <div v-if="detailData.summary" class="detail-summary">{{ detailData.summary }}</div>
-        <div class="detail-content" v-html="renderContent(detailData.content)" />
+        <div class="detail-content" v-html="detailData.content || emptyContent" />
       </div>
       <div slot="footer">
         <el-button size="small" @click="detailVisible = false">关闭</el-button>
@@ -225,10 +225,17 @@
 <script>
 import { getArticleList, createArticle, updateArticle, deleteArticle, toggleArticleStatus, toggleArticleTop, toggleArticleRecommend, getCategoryTree } from '@/api/article'
 import Pagination from '@/components/Pagination/index.vue'
+import { quillEditor } from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
 
 export default {
   name: 'ArticleManagement',
-  components: { Pagination },
+  components: {
+    Pagination,
+    quillEditor
+  },
   data() {
     return {
       loading: false,
@@ -262,15 +269,36 @@ export default {
       formRules: {
         title: [{ required: true, message: '请输入文章标题', trigger: 'blur' }],
         author: [{ required: true, message: '请输入作者名', trigger: 'blur' }],
-        content: [{ required: true, message: '请输入文章内容', trigger: 'blur' }]
+        content: [{ required: true, message: '请输入文章内容', trigger: 'change' }]
+      },
+      // 富文本编辑器配置
+      editorOption: {
+        placeholder: '请编写文章内容...',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ header: 1 }, { header: 2 }, { header: 3 }, { header: 4 }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ indent: '-1' }, { indent: '+1' }],
+            [{ align: [] }],
+            [{ color: [] }, { background: [] }],
+            ['link', 'image'],
+            ['clean']
+          ]
+        }
       },
       detailVisible: false,
-      detailData: {}
+      detailData: {},
+      emptyContent: '<p style="color:#999">暂无内容</p>'
     }
   },
   computed: {
     dialogTitle() {
       return this.isEdit ? '编辑文章' : '新增文章'
+    },
+    editor() {
+      return this.$refs.quillEditor
     }
   },
   created() {
@@ -312,9 +340,8 @@ export default {
       const map = { draft: '草稿', published: '已发布', unpublished: '已下架' }
       return map[status] || status
     },
-    renderContent(content) {
-      if (!content) return '<p style="color:#999">暂无内容</p>'
-      return content.replace(/\n/g, '<br/>')
+    onEditorChange({ html, text }) {
+      this.form.content = html
     },
     handleUploadCover(options) {
       const file = options.file
@@ -520,10 +547,26 @@ export default {
   }
 }
 
-.article-editor {
-  ::v-deep textarea {
-    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-    line-height: 1.6;
+.rich-editor {
+  line-height: normal;
+
+  ::v-deep .ql-toolbar {
+    border: 1px solid $border-base !important;
+    border-radius: 6px 6px 0 0;
+    background-color: #FAFBFC;
+  }
+
+  ::v-deep .ql-container {
+    border: 1px solid $border-base !important;
+    border-top: none !important;
+    border-radius: 0 0 6px 6px;
+    min-height: 280px;
+
+    .ql-editor {
+      min-height: 280px;
+      font-size: 14px;
+      line-height: 1.7;
+    }
   }
 }
 
@@ -571,5 +614,37 @@ export default {
   font-size: 15px;
   color: $text-regular;
   line-height: 1.8;
+
+  ::v-deep p {
+    margin: 0 0 12px;
+  }
+
+  ::v-deep img {
+    max-width: 100%;
+    border-radius: 6px;
+  }
+
+  ::v-deep blockquote {
+    border-left: 4px solid $primary-color;
+    padding: 12px 16px;
+    margin: 16px 0;
+    background: $bg-page;
+    color: $text-secondary;
+  }
+
+  ::v-deep pre {
+    background: #1A1A2E;
+    color: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13px;
+  }
+
+  ::v-deep h1, ::v-deep h2, ::v-deep h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: $text-primary;
+  }
 }
 </style>

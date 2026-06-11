@@ -23,7 +23,7 @@
             <path d="M16 20h8l8 12-8 12h-8l8-12-8-12zm16 0h8l8 12-8 12h-8l8-12-8-12z" fill="white" opacity="0.95"/>
           </svg>
         </div>
-        <h1 class="brand-title">OpenClaw AI</h1>
+        <h1 class="brand-title">量子Admin</h1>
         <p class="brand-subtitle">智能AI平台管理系统</p>
         <div class="brand-features">
           <div class="feature-item">
@@ -62,7 +62,7 @@
             <el-input
               ref="username"
               v-model="loginForm.username"
-              placeholder="请输入用户名"
+              placeholder="请输入用户名,admin"
               name="username"
               type="text"
               tabindex="1"
@@ -77,7 +77,7 @@
               ref="password"
               v-model="loginForm.password"
               type="password"
-              placeholder="请输入密码"
+              placeholder="请输入密码,默认密码:admin123"
               name="password"
               tabindex="2"
               autocomplete="on"
@@ -104,7 +104,11 @@
         </el-form>
 
         <div class="form-footer">
-          <span>OpenClaw AI 管理系统 v1.0</span>
+          <p class="footer-line">本程序由量子软件工作室开发</p>
+          <p class="footer-line">
+            官网：<a href="http://www.dglzsoft.com" target="_blank" rel="noopener">www.dglzsoft.com</a>
+          </p>
+          <p class="footer-line">技术支持微信：yework2016</p>
         </div>
       </div>
     </div>
@@ -405,8 +409,24 @@ export default {
 .form-footer {
   text-align: center;
   margin-top: 40px;
-  color: $text-secondary;
-  font-size: 12px;
+
+  .footer-line {
+    color: $text-placeholder;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 0;
+
+    a {
+      color: $text-secondary;
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover {
+        color: $primary-color;
+        text-decoration: underline;
+      }
+    }
+  }
 }
 
 @media screen and (max-width: 768px) {

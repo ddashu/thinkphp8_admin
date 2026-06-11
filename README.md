@@ -1,19 +1,22 @@
-# OpenClaw AI Admin
+# 量子Admin - 智能AI平台管理系统
 
-基于 **ThinkPHP 8.0 + Vue 2.0 + ElementUI** 的后台管理系统，采用前后端分离架构，支持 RBAC 权限管理、JWT 认证、多支付渠道配置等功能。
+基于 **ThinkPHP 8 + Vue 2 + ElementUI** 的企业级后台管理系统，采用前后端分离架构，集成 RBAC 权限管理、JWT 认证、多支付渠道配置、富文本编辑器等功能。
+
+> **开发团队**：量子软件工作室 | **官网**：[www.dglzsoft.com](http://www.dglzsoft.com) | **技术支持微信**：yework2016
 
 ## 技术栈
 
-| 层级 | 技术 | 版本 |
-|------|------|------|
-| 后端框架 | ThinkPHP | 8.1 |
-| 前端框架 | Vue | 2.x |
-| UI 组件库 | ElementUI | 2.15 |
-| 数据库 | MySQL | 8.0+ |
-| 认证方式 | JWT (firebase/php-jwt) | 7.x |
-| 状态管理 | Vuex | 3.x |
-| HTTP 客户端 | Axios | - |
-| 图表库 | ECharts | 5.x |
+| 层级 | 技术 | 版本 | 说明 |
+|------|------|------|------|
+| 后端框架 | ThinkPHP | 8.1 | PHP 全栈框架 |
+| 前端框架 | Vue | 2.x | 渐进式 SPA 框架 |
+| UI 组件库 | ElementUI | 2.15 | 企业级组件库 |
+| 富文本编辑器 | Quill | 1.x | 文章内容编辑（vue-quill-editor） |
+| 图表库 | ECharts | 5.x | 数据可视化看板 |
+| 数据库 | MySQL | 8.0+ | 关系型数据库 |
+| 认证方式 | JWT | 7.x | firebase/php-jwt 双令牌 |
+| 状态管理 | Vuex | 3.x | 集中式状态管理 |
+| HTTP 客户端 | Axios | - | 请求拦截与响应处理 |
 
 ## 功能模块
 
@@ -28,14 +31,14 @@
 - **AI 模型** - 模型列表管理、启用/禁用切换
 
 ### 内容管理
-- **文章管理** - 文章 CRUD、分类选择、封面上传、置顶/推荐、发布/下架
+- **文章管理** - Quill 富文本编辑器、分类选择、封面上传、置顶/推荐、发布/下架
 - **支付配置**
   - 微信支付：商户号、AppID、API密钥、证书路径、回调地址、沙箱模式
-  - 支付宝：AppID、应用私钥、支付宝公钥、签名方式、异步/同步回调地址
+  - 支付宝：AppID、应用私钥(PKCS8)、支付宝公钥、签名方式(RSA2/RSA)、异步/同步回调地址
 - **短信配置** - 多短信渠道管理（阿里云/腾讯云等）、每日用量统计
 
 ### 其他功能
-- **数据看板** - ECharts 图表展示（用户趋势、API 调用分布）
+- **数据看板** - ECharts 图表展示（用户趋势、API 调用分布、模型使用情况）
 - **操作日志** - 用户操作记录查询与详情查看
 - **文件管理** - 文件上传与管理
 - **个人中心** - 修改个人信息、头像上传、密码修改
@@ -44,6 +47,9 @@
 
 ```
 thinkphp8_admin/
+├── html/                         # 功能介绍页面
+│   ├── index.html                #   单页介绍页（响应式）
+│   └── images/                   #   后台功能截图（8张）
 ├── app/                          # 后端应用目录
 │   ├── controller/admin/         # 控制器（16个）
 │   │   ├── Auth.php              #   登录认证
@@ -59,9 +65,9 @@ thinkphp8_admin/
 │   │   ├── Profile.php           #   个人中心
 │   │   ├── PaymentConfig.php     #   微信支付配置
 │   │   ├── AlipayConfig.php      #   支付宝配置
-│   │   ├── SmsConfig.php         #   短信渠道配置
-│   │   ├── ArticleCategory.php   #   文章分类
-│   │   └── Article.php           #   文章管理
+│   │   ├── SmsConfig.py          #   短信渠道配置
+│   │   ├── ArticleCategory.py    #   文章分类
+│   │   └── Article.py            #   文章管理（含富文本）
 │   ├── model/                    # 模型层（18个）
 │   ├── middleware/               # 中间件（CORS / Auth / Permission / OperationLog）
 │   ├── service/                  # 服务层（Token / Auth / User / Role / Menu）
@@ -79,7 +85,7 @@ thinkphp8_admin/
 │   ├── src/
 │   │   ├── api/                  #   API 接口定义（15个模块）
 │   │   ├── views/                #   页面组件
-│   │   │   ├── login/            #     登录页
+│   │   │   ├── login/            #     登录页（含公司信息底部）
 │   │   │   ├── dashboard/        #     数据看板
 │   │   │   ├── system/           #     系统（用户/角色/菜单/配置）
 │   │   │   ├── ai/               #     AI（密钥/模型）
@@ -87,17 +93,19 @@ thinkphp8_admin/
 │   │   │   ├── log/              #     日志
 │   │   │   ├── file/             #     文件
 │   │   │   └── profile/          #     个人中心
-│   │   ├── layout/               #   布局组件（侧边栏/导航栏/标签栏）
+│   │   ├── layout/               #   布局组件（侧边栏含公司信息底部）
 │   │   ├── router/index.js       #   路由配置
-│   │   ├── store/modules/        #   Vuex 模块（user/permission/app/tagsView/settings）
-│   │   ├── styles/               #   SCSS 样式（变量/全局/侧边栏/覆盖）
-│   │   └── utils/                #   工具函数（request/auth）
+│   │   ├── store/modules/        #   Vuex 模块
+│   │   ├── styles/               #   SCSS 样式
+│   │   └── utils/                #   工具函数
 │   └── vue.config.js             #   Webpack 配置
 ├── public/                       # 入口目录
 │   ├── index.php                 #   后端入口
 │   └── dist/                     #   前端构建产物
 ├── .env                          # 环境变量
+├── .gitignore                    # Git 忽略规则
 ├── composer.json                 # PHP 依赖
+├── README.md                     # 项目文档
 └── frontend/package.json         # Node.js 依赖
 ```
 
@@ -123,9 +131,6 @@ cd thinkphp8_admin
 ```bash
 # 安装 PHP 依赖
 composer install
-
-# 复制环境变量文件
-cp .env.example .env
 
 # 编辑 .env，配置数据库连接信息
 ```
@@ -171,6 +176,7 @@ npm run build
 - 后端：通过小皮面板 / phpStudy 配置站点，指向 `public` 目录
 - 前端开发：`npm run serve` 启动在 `http://localhost:8080`
 - 生产部署：前端构建产物输出到 `public/dist`，直接访问后端地址即可
+- 功能介绍页面：直接浏览器打开 `html/index.html` 即可预览
 
 ## 默认账号
 
@@ -197,9 +203,14 @@ npm run build
 | 角色 | POST | `/role/assign-menus/:id` | 分配权限 |
 | 菜单 | GET | `/menu/tree` | 菜单树 |
 | 支付 | GET | `/payment/config` | 微信支付配置 |
+| 支付 | PUT | `/payment/config/save` | 保存微信支付配置 |
 | 支付 | GET | `/alipay/config` | 支付宝配置 |
+| 支付 | PUT | `/alipay/config` | 保存支付宝配置 |
 | 短信 | GET | `/sms/config` | 短信渠道列表 |
+| 短信 | POST | `/sms/config` | 新增短信渠道 |
 | 文章 | GET | `/article` | 文章列表 |
+| 文章 | POST | `/article` | 新增文章 |
+| 文章 | PUT | `/article/:id` | 编辑文章 |
 | 文章 | GET | `/article/category/tree` | 分类树 |
 | ... | ... | ... | 更多路由见 `route/app.php` |
 
@@ -210,8 +221,16 @@ npm run build
 - **统一响应格式**：`{ code, message, data }`
 - **操作日志中间件**：自动记录所有写操作
 - **动态路由**：根据角色权限动态生成侧边栏菜单
+- **富文本编辑器**：Quill 集成，支持加粗/斜体/标题/列表/对齐/颜色/链接/图片等
+- **多渠道支付**：微信支付 + 支付宝双 Tab 配置界面
 - **深色侧边栏 + 浅色内容区** UI 设计风格
+- **品牌定制**：登录页/侧边栏底部展示公司信息（量子软件工作室）
 
 ## License
 
 MIT
+
+---
+
+本程序由 [量子软件工作室](http://www.dglzsoft.com) 开发  
+技术支持微信：yework2016

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>量子Admin - 智能AI平台管理系统</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%234C6EF5'/><path d='M16 20h8l8 12-8 12h-8l8-12-8-12zm16 0h8l8 12-8 12h-8l8-12-8-12z' fill='white' opacity='.95'/></svg>">
+  <style>
+    /* ========== Reset & Base ========== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      color: #1a1a2e; line-height: 1.6; background: #f5f7fa; overflow-x: hidden;
+    }
+    a { color: #4c6ef5; text-decoration: none; transition: color .2s; }
+    a:hover { color: #3b5bdb; }
+    img { max-width: 100%; display: block; }
+
+    /* ========== Variables ========== */
+    :root {
+      --primary: #4C6EF5;
+      --primary-dark: #3B5DBB;
+      --primary-light: #748FFC;
+      --success: #40C057;
+      --warning: #FAB005;
+      --danger: #FA5252;
+      --dark: #1A1A2E;
+      --gray-900: #212529;
+      --gray-700: #495057;
+      --gray-500: #868e96;
+      --gray-300: #dee2e6;
+      --gray-100: #f1f3f5;
+      --white: #ffffff;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 24px rgba(0,0,0,.08);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,.12);
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+
+    /* ========== Hero Section ========== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1A1A2E 0%, #2D3A6E 35%, #3B5BDB 70%, #4C6EF5 100%);
+      overflow: hidden;
+      text-align: center;
+      color: var(--white);
+      padding: 80px 20px;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(76,110,245,.25) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(116,143,252,.2) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.03) 0%, transparent 70%);
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.12); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.15); border-radius: 30px;
+      padding: 6px 18px; font-size: 13px; margin-bottom: 28px;
+      animation: fadeInDown .8s ease both;
+    }
+    .hero-badge svg { width: 14px; height: 14px; }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800; line-height: 1.15;
+      letter-spacing: -1px; margin-bottom: 20px;
+      animation: fadeInUp .8s .2s ease both;
+    }
+    .hero h1 span { background: linear-gradient(135deg, #fff 30%, #a8c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p {
+      font-size: clamp(16px, 2vw, 20px); opacity: .85;
+      max-width: 600px; margin: 0 auto 36px; line-height: 1.7;
+      animation: fadeInUp .8s .4s ease both;
+    }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; animation: fadeInUp .8s .6s ease both; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all .3s ease; border: none;
+    }
+    .btn-primary { background: var(--white); color: var(--primary); box-shadow: 0 4px 20px rgba(0,0,0,.15); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.2); }
+    .btn-outline {
+      background: transparent; color: var(--white);
+      border: 1.5px solid rgba(255,255,255,.35);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.55); }
+    .hero-stats {
+      display: flex; gap: 48px; justify-content: center; margin-top: 56px;
+      animation: fadeInUp .8s .8s ease both;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-num { font-size: 32px; font-weight: 800; }
+    .hero-stat-label { font-size: 13px; opacity: .65; margin-top: 2px; }
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      opacity: .5; animation: bounce 2s infinite;
+    }
+    .scroll-hint svg { width: 24px; height: 24px; }
+
+    /* ========== Section Common ========== */
+    .section { padding: 100px 20px; }
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 60px; }
+    .section-tag {
+      display: inline-block; background: #EDF2FF; color: var(--primary);
+      padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .section-title { font-size: clamp(28px, 4vw, 40px); font-weight: 800; color: var(--dark); letter-spacing: -.5px; }
+    .section-subtitle { font-size: 17px; color: var(--gray-500); max-width: 600px; margin: 12px auto 0; line-height: 1.7; }
+
+    /* ========== Features Grid ========== */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; margin-top: 20px;
+    }
+    .feature-card {
+      background: var(--white); border-radius: var(--radius-lg); padding: 32px;
+      box-shadow: var(--shadow-sm); transition: all .3s ease;
+      border: 1px solid rgba(0,0,0,.04);
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 18px;
+    }
+    .feature-icon.purple { background: #EEF0FF; color: #7950F2; }
+    .feature-icon.green { background: #D3F9D8; color: #2B8A3E; }
+    .feature-icon.blue { background: #D0EBFF; color: #1971C2; }
+    .feature-icon.orange { background: #FFF3BF; color: #E8590C; }
+    .feature-icon.red { background: #FFE3E3; color: #E03131; }
+    .feature-card h3 { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--gray-500); line-height: 1.7; }
+
+    /* ========== Module Showcase ========== */
+    .showcase-section { background: var(--white); }
+    .module-item {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+      margin-bottom: 100px;
+    }
+    .module-item:last-child { margin-bottom: 0; }
+    .module-item:nth-child(even) .module-img { order: -1; }
+    .module-text h3 { font-size: 26px; font-weight: 800; color: var(--dark); margin-bottom: 14px; }
+    .module-text p { font-size: 15px; color: var(--gray-500); line-height: 1.8; margin-bottom: 10px; }
+    .module-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+    .module-tag {
+      background: #F8F9FA; color: var(--gray-700); padding: 4px 12px;
+      border-radius: 6px; font-size: 12px; font-weight: 500; border: 1px solid var(--gray-300);
+    }
+    .module-img {
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-lg); border: 1px solid rgba(0,0,0,.06);
+      background: #fafbfc;
+    }
+    .module-img img { width: 100%; height: auto; display: block; }
+
+    /* ========== Tech Stack ========== */
+    .tech-section { background: linear-gradient(180deg, #f5f7fa 0%, #fff 100%); }
+    .tech-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .tech-card {
+      background: var(--white); border-radius: var(--radius); padding: 28px 24px;
+      text-align: center; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,.04);
+      transition: all .3s;
+    }
+    .tech-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .tech-logo { font-size: 36px; margin-bottom: 12px; }
+    .tech-name { font-size: 16px; font-weight: 700; color: var(--dark); }
+    .tech-desc { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+
+    /* ========== Architecture ========== */
+    .arch-container {
+      background: var(--dark); border-radius: var(--radius-lg); padding: 48px;
+      color: var(--white); overflow-x: auto;
+    }
+    .arch-diagram {
+      display: flex; gap: 0; justify-content: center; align-items: stretch;
+      min-width: 720px;
+    }
+    .arch-layer {
+      padding: 24px 20px; text-align: center; border-right: 1px solid rgba(255,255,255,.08);
+      display: flex; flex-direction: column; justify-content: center; flex: 1;
+    }
+    .arch-layer:last-child { border-right: none; }
+    .arch-layer-title { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: .45; margin-bottom: 12px; }
+    .arch-item {
+      background: rgba(255,255,255,.06); border-radius: 8px; padding: 10px 14px;
+      font-size: 13px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,.04);
+    }
+    .arch-item:last-child { margin-bottom: 0; }
+    .arch-item strong { color: var(--primary-light); }
+
+    /* ========== Flow Steps ========== */
+    .flow-steps { display: flex; gap: 0; justify-content: center; counter-reset: step; flex-wrap: wrap; }
+    .flow-step {
+      flex: 1; min-width: 200px; text-align: center; padding: 32px 20px;
+      position: relative; counter-increment: step;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute; top: 56px; right: -12px;
+      width: 24px; height: 2px; background: var(--gray-300);
+    }
+    .flow-step-num {
+      width: 44px; height: 44px; border-radius: 50%; background: var(--primary);
+      color: var(--white); font-size: 18px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .flow-step h4 { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+    .flow-step p { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
+
+    /* ========== CTA Section ========== */
+    .cta-section {
+      background: linear-gradient(135deg, var(--dark) 0%, #2D3A6E 50%, var(--primary-dark) 100%);
+      color: var(--white); text-align: center; padding: 90px 20px;
+    }
+    .cta-section h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; margin-bottom: 16px; }
+    .cta-section p { font-size: 17px; opacity: .8; margin-bottom: 36px; max-width: 550px; margin-left: auto; margin-right: auto; }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--white); color: var(--primary);
+      padding: 16px 40px; border-radius: 10px; font-size: 16px; font-weight: 700;
+      transition: all .3s; border: none; cursor: pointer;
+    }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+
+    /* ========== Footer ========== */
+    .footer {
+      background: var(--dark); color: rgba(255,255,255,.55);
+      padding: 48px 20px 32px; text-align: center;
+    }
+    .footer-brand { font-size: 22px; font-weight: 800; color: var(--white); margin-bottom: 16px; }
+    .footer-brand span { color: var(--primary-light); }
+    .footer-info { font-size: 13px; line-height: 2; }
+    .footer-info a { color: var(--primary-light); }
+    .footer-info a:hover { color: var(--white); text-decoration: underline; }
+    .footer-copy {
+      margin-top: 24px; padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      font-size: 12px; opacity: .4;
+    }
+
+    /* ========== Animations ========== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 900px) {
+      .module-item { grid-template-columns: 1fr; gap: 28px; margin-bottom: 60px; }
+      .module-item:nth-child(even) .module-img { order: 0; }
+      .hero-stats { gap: 28px; }
+      .arch-diagram { min-width: unset; flex-direction: column; }
+      .arch-layer { border-right: none; border-bottom: 1px solid rgba(255,255,255,.08); }
+      .flow-step:not(:last-child)::after { display: none; }
+    }
+    @media (max-width: 600px) {
+      .section { padding: 64px 16px; }
+      .hero { padding: 60px 16px; }
+      .hero-stats { flex-direction: column; gap: 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .tech-cards { grid-template-columns: repeat(2, 1fr); }
+      .flow-steps { flex-direction: column; }
+      .flow-step { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== Hero ==================== -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        全新发布 v1.0
+      </div>
+      <h1><span>量子Admin</span><br>智能AI平台管理系统</h1>
+      <p>基于 ThinkPHP 8 + Vue 2 的企业级后台管理框架，集成 RBAC 权限、JWT 认证、多支付渠道、富文本编辑等核心能力，助您快速构建现代化 Web 应用。</p>
+      <div class="hero-actions">
+        <a href="#modules" class="btn btn-primary">功能预览</a>
+        <a href="#tech" class="btn btn-outline">技术架构</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num">10+</div>
+          <div class="hero-stat-label">功能模块</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">15</div>
+          <div class="hero-stat-label">数据表</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">REST</div>
+          <div class="hero-stat-label">API 接口</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">RBAC</div>
+          <div class="hero-stat-label">权限模型</div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+    </div>
+  </section>
+
+  <!-- ==================== Core Features ==================== -->
+  <section class="section" id="features">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">核心特性</span>
+        <h2 class="section-title">为什么选择量子Admin</h2>
+        <p class="section-subtitle">从权限控制到内容管理，从 AI 集成到支付对接，一站式解决企业后台需求</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon purple">&#x1F512;</div>
+          <h3>RBAC 权限模型</h3>
+          <p>用户 → 角色 → 菜单（按钮）三级权限体系，支持细粒度到按钮级别的访问控制，灵活适配各类组织架构。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">&#x1F510;</div>
+          <h3>JWT 安全认证</h3>
+          <p>Access Token + RefreshToken 双令牌机制，支持无感续期，保障接口安全的同时提供流畅的登录体验。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon blue">&#x1F4CA;</div>
+          <h3>数据可视化看板</h3>
+          <p>基于 ECharts 构建的数据看板，实时展示用户趋势、API 调用分布、模型使用情况，让运营数据一目了然。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon orange">&#x1F4CB;</div>
+          <h3>多渠道支付配置</h3>
+          <p>内置微信支付、支付宝双渠道配置管理，支持沙箱测试、回调地址配置，一键测试连通性。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon red">&#x1F4D4;</div>
+          <h3>富文本文章管理</h3>
+          <p>集成 Quill 富文本编辑器，支持图文混排、分类管理、置顶推荐、发布下架，满足内容运营全流程。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon purple">&#x1F4E1;</div>
+          <h3>短信渠道管理</h3>
+          <p>支持阿里云、腾讯云等多短信渠道并行管理，含每日用量统计、默认渠道切换，稳定可靠。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Module Showcase ==================== -->
+  <section class="section showcase-section" id="modules">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">功能演示</span>
+        <h2 class="section-title">系统功能一览</h2>
+        <p class="section-subtitle">精心设计的每一个页面，让管理变得简单高效</p>
+      </div>
+
+      <!-- 登录页 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>精美登录界面</h3>
+          <p>采用左右分栏式设计，左侧品牌展示区配合动态装饰元素，右侧登录区支持记住密码，整体视觉现代且专业。</p>
+          <div class="module-tags">
+            <span class="module-tag">响应式布局</span>
+            <span class="module-tag">动态背景</span>
+            <span class="module-tag">表单验证</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/login.png" alt="登录页面截图">
+        </div>
+      </div>
+
+      <!-- 数据看板 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>数据可视化看板</h3>
+          <p>基于 ECharts 打造的管理首页，包含用户增长趋势折线图、API 调用统计柱状图、AI 模型使用分布饼图等核心指标展示。</p>
+          <div class="module-tags">
+            <span class="module-tag">ECharts 图表</span>
+            <span class="module-tag">实时数据</span>
+            <span class="module-tag">趋势分析</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/dashboard.png" alt="数据看板截图">
+        </div>
+      </div>
+
+      <!-- 用户管理 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>用户权限管理</h3>
+          <p>完整的用户 CRUD 操作，支持状态切换、密码重置、搜索筛选。配合角色管理实现灵活的人员权限分配。</p>
+          <div class="module-tags">
+            <span class="module-tag">CRUD 操作</span>
+            <span class="module-tag">状态切换</span>
+            <span class="module-tag">搜索筛选</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/system-user.png" alt="用户管理截图">
+        </div>
+      </div>
+
+      <!-- 角色管理 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>角色与权限授权</h3>
+          <p>可视化树形菜单勾选授权，支持目录/菜单/按钮三级权限粒度。一个角色可关联多个菜单，一个用户可拥有多个角色。</p>
+          <div class="module-tags">
+            <span class="module-tag">树形权限</span>
+            <span class="module-tag">可视化勾选</span>
+            <span class="module-tag">三级粒度</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/system-role.png" alt="角色管理截图">
+        </div>
+      </div>
+
+      <!-- AI 密钥管理 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>AI API 密钥管理</h3>
+          <p>集中管理各 AI 服务商的 API Key，支持密钥创建、编辑、启用/禁用操作，为上层 AI 应用提供统一密钥调度入口。</p>
+          <div class="module-tags">
+            <span class="module-tag">统一管理</span>
+            <span class="module-tag">状态控制</span>
+            <span class="module-tag">安全存储</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/ai-apikey.png" alt="AI密钥管理截图">
+        </div>
+      </div>
+
+      <!-- 文章管理 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>富文本文章系统</h3>
+          <p>集成 Quill 富文本编辑器，支持加粗/斜体/标题/列表/对齐/颜色/链接/图片等丰富格式。配合分类、封面、置顶、推荐等功能。</p>
+          <div class="module-tags">
+            <span class="module-tag">Quill 编辑器</span>
+            <span class="module-tag">分类管理</span>
+            <span class="module-tag">置顶推荐</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/content-article.png" alt="文章管理截图">
+        </div>
+      </div>
+
+      <!-- 支付配置 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>多渠道支付配置</h3>
+          <p>Tab 切换式配置界面，同时支持微信支付和支付宝。涵盖 AppID、商户号、私钥公钥、签名方式、回调地址等完整参数。</p>
+          <div class="module-tags">
+            <span class="module-tag">微信支付</span>
+            <span class="module-tag">支付宝</span>
+            <span class="module-tag">沙箱测试</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/content-payment.png" alt="支付配置截图">
+        </div>
+      </div>
+
+      <!-- 短信配置 -->
+      <div class="module-item">
+        <div class="module-text">
+          <h3>短信渠道配置</h3>
+          <p>表格化管理多个短信服务商渠道，每个渠道可独立配置 AccessKey、签名、模板，支持设置每日发送上限与默认渠道切换。</p>
+          <div class="module-tags">
+            <span class="module-tag">多渠道并行</span>
+            <span class="module-tag">用量监控</span>
+            <span class="module-tag">默认切换</span>
+          </div>
+        </div>
+        <div class="module-img">
+          <img src="images/content-sms.png" alt="短信配置截图">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Tech Stack ==================== -->
+  <section class="section tech-section" id="tech">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">技术架构</span>
+        <h2 class="section-title">成熟稳定的技术栈</h2>
+        <p class="section-subtitle">选用主流企业级框架，确保系统的可维护性与扩展性</p>
+      </div>
+      <div class="tech-cards">
+        <div class="tech-card">
+          <div class="tech-logo">&#x1F41B;</div>
+          <div class="tech-name">ThinkPHP 8</div>
+          <div class="tech-desc">PHP 后端框架</div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-logo">&#x26A1;</div>
+          <div class="tech-name">Vue 2</div>
+          <div class="tech-desc">前端渐进式框架</div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-logo">&#x1F469;</div>
+          <div class="tech-name">ElementUI</div>
+          <div class="tech-desc">桌面端组件库</div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-logo">&#x1F4CA;</div>
+          <div class="tech-name">ECharts</div>
+          <div class="tech-desc">数据可视化图表</div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-logo">&#x1F510;</div>
+          <div class="tech-name">JWT</div>
+          <div class="tech-desc">身份认证方案</div>
+        </div>
+        <div class="tech-card">
+          <div class="tech-logo">&#x1F4BE;</div>
+          <div class="tech-name">MySQL 8</div>
+          <div class="tech-desc">关系型数据库</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Architecture Diagram ==================== -->
+  <section class="section" style="background:#fff;">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">架构设计</span>
+        <h2 class="section-title">前后端分离架构</h2>
+        <p class="section-subtitle">清晰的分层设计，标准化的 API 接口规范</p>
+      </div>
+      <div class="arch-container">
+        <div class="arch-diagram">
+          <div class="arch-layer">
+            <div class="arch-layer-title">前端层 Frontend</div>
+            <div class="arch-item">Vue 2 SPA 单页应用</div>
+            <div class="arch-item">ElementUI 组件库</div>
+            <div class="arch-item">Vuex 状态管理</div>
+            <div class="arch-item">Vue Router 动态路由</div>
+            <div class="arch-item">Axios HTTP 客户端</div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-title">API 层 Gateway</div>
+            <div class="arch-item"><strong>RESTful</strong> 统一接口风格</div>
+            <div class="arch-item">{code, message, data} 响应格式</div>
+            <div class="arch-item">JWT Bearer Token 鉴权</div>
+            <div class="arch-item">CORS 跨域中间件</div>
+            <div class="arch-item">操作日志自动记录</div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-title">业务层 Business</div>
+            <div class="arch-item">Controller 控制器</div>
+            <div class="arch-item">Service 服务层</div>
+            <div class="arch-item">Model 模型层 (ORM)</div>
+            <div class="auth-item">Middleware 中间件</div>
+            <div class="arch-item">RBAC 权限校验</div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-title">数据层 Data</div>
+            <div class="arch-item">MySQL 8 数据库</div>
+            <div class="arch-item">15+ 核心业务表</div>
+            <div class="arch-item">索引优化 / 软删除</div>
+            <div class="arch-item">JSON 种子数据初始化</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== Usage Flow ==================== -->
+  <section class="section" style="background:linear-gradient(180deg,#fff,#f5f7fa);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">快速上手</span>
+        <h2 class="section-title">四步完成部署</h2>
+        <p class="section-subtitle">从零到上线，最快只需 10 分钟</p>
+      </div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-num">1</div>
+          <h4>环境准备</h4>
+          <p>PHP 8.0+ / MySQL 8 / Node.js<br>Composer 安装依赖</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">2</div>
+          <h4>导入数据库</h4>
+          <p>执行 SQL 初始化脚本<br>自动创建表结构与种子数据</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">3</div>
+          <h4>前端构建</h4>
+          <p>npm install 安装依赖<br>npm run build 生产打包</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">4</div>
+          <h4>启动访问</h4>
+          <p>配置站点指向 public 目录<br>admin / admin123 登录使用</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CTA ==================== -->
+  <section class="cta-section">
+    <h2>准备好开始了吗？</h2>
+    <p>立即体验量子Admin，开启高效的企业级后台管理之旅</p>
+    <a href="https://github.com/ddashu/thinkphp8_admin" target="_blank" rel="noopener" class="cta-btn">
+      &#128279; 查看 GitHub 仓库
+    </a>
+  </section>
+
+  <!-- ==================== Footer ==================== -->
+  <footer class="footer">
+    <div class="footer-brand">量子<span>Admin</span></div>
+    <div class="footer-info">
+      本程序由量子软件工作室开发<br>
+      官网：<a href="http://www.dglzsoft.com" target="_blank" rel="noopener">www.dglzsoft.com</a><br>
+      技术支持微信：yework2016
+    </div>
+    <div class="footer-copy">
+      &copy; 2026 量子软件工作室 &middot; Powered by ThinkPHP 8 + Vue 2 + ElementUI
+    </div>
+  </footer>
+
+</body>
+</html>

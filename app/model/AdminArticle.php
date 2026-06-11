@@ -22,10 +22,6 @@ class AdminArticle extends Model
         'update_time'   => 'datetime',
     ];
 
-    protected $casts = [
-        'content' => 'array',
-    ];
-
     public function category()
     {
         return $this->belongsTo(AdminArticleCategory::class, 'category_id', 'id');

@@ -5,6 +5,19 @@ use app\model\AdminArticle;
 
 class Article extends BaseAdmin
 {
+    // 允许写入的字段
+    private $allowedFields = [
+        'title', 'summary', 'author', 'source', 'category_id',
+        'cover_image', 'content', 'status', 'is_top', 'is_recommend'
+    ];
+
+    // 状态映射：前端字符串 → 数据库整数值
+    private $statusMap = [
+        'draft'      => 0,
+        'published'  => 1,
+        'unpublished' => 2,
+    ];
+
     /**
      * 文章列表（分页，支持搜索）
      */
@@ -27,14 +40,17 @@ class Article extends BaseAdmin
                 $query->where('status', intval($params['status']));
             }
 
-            $list = $query->order('is_top', 'desc')
+            $paginator = $query->order('is_top', 'desc')
                 ->order('id', 'desc')
                 ->paginate([
                     'page'      => intval($params['page'] ?? 1),
                     'list_rows' => intval($params['page_size'] ?? 15),
                 ]);
 
-            return success($list);
+            return success([
+                'list'    => $paginator->items(),
+                'total'   => $paginator->total(),
+            ]);
         } catch (\Exception $e) {
             return error($e->getMessage());
         }
@@ -52,7 +68,11 @@ class Article extends BaseAdmin
             }
             // 阅读量+1
             $article->inc('view_count')->update();
-            return success($article);
+
+            // 将数字状态转为前端字符串
+            $data = $article->toArray();
+            $data['status'] = array_search($data['status'], $this->statusMap) ?: 'draft';
+            return success($data);
         } catch (\Exception $e) {
             return error($e->getMessage());
         }
@@ -69,11 +89,12 @@ class Article extends BaseAdmin
         }
 
         try {
-            $data['user_id'] = $this->userId;
-            $article = AdminArticle::create($data);
+            $saveData = $this->filterData($data);
+            $saveData['user_id'] = $this->userId;
+            $article = AdminArticle::create($saveData);
             return success($article, '创建成功', 201);
         } catch (\Exception $e) {
-            return error($e->getMessage());
+            return error('创建失败：' . $e->getMessage());
         }
     }
 
@@ -84,10 +105,11 @@ class Article extends BaseAdmin
     {
         $data = $this->request->put();
         try {
-            $article = AdminArticle::update($data, ['id' => intval($id)]);
+            $saveData = $this->filterData($data);
+            $article = AdminArticle::update($saveData, ['id' => intval($id)]);
             return success($article, '更新成功');
         } catch (\Exception $e) {
-            return error($e->getMessage());
+            return error('更新失败：' . $e->getMessage());
         }
     }
 
@@ -159,5 +181,29 @@ class Article extends BaseAdmin
         } catch (\Exception $e) {
             return error($e->getMessage());
         }
+    }
+
+    /**
+     * 过滤并转换数据
+     */
+    private function filterData($data)
+    {
+        $result = [];
+        foreach ($this->allowedFields as $field) {
+            if (isset($data[$field])) {
+                $value = $data[$field];
+                // 状态字段：字符串转整数
+                if ($field === 'status') {
+                    $value = $this->statusMap[$value] ?? 0;
+                }
+                // 整型字段确保为整数
+                if (in_array($field, ['category_id', 'is_top', 'is_recommend'])) {
+                    $value = intval($value);
+                }
+                // 空字符串保持为空字符串，不转为 null（避免 NOT NULL 约束报错）
+                $result[$field] = $value;
+            }
+        }
+        return $result;
     }
 }
